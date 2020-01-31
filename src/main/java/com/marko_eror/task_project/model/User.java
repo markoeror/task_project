@@ -51,14 +51,16 @@ public class User {
     private String password;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(name = "user_roles",
+    @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = CascadeType.ALL)
-    private Set<Task> tasks = new HashSet<>();
-
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @JoinTable(name = "users_projects",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id"))
+    private Set<Project> projectsSet = new HashSet<>();
 
 
     public User() {
@@ -128,14 +130,14 @@ public class User {
         this.roles = roles;
     }
 
-    //Methods for synchronisation adding and removing tasks from user
-    public void addTask(Task task) {
-        tasks.add(task);
-        task.setUser(this);
+    //Synchronise methods User and Project
+    public void addProject(Project project) {
+        projectsSet.add(project);
+        project.getUsers().add(this);
     }
 
-    public void removeTask(Task task) {
-        tasks.remove(task);
-        task.setUser(null);
+    public void removeProject(Project project) {
+        projectsSet.remove(project);
+        project.getUsers().remove(this);
     }
 }
