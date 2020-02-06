@@ -50,6 +50,7 @@ public class AuthRestAPIs {
     @Autowired
     JwtProvider jwtProvider;
 
+    // Method for signing in which returns token if authorised
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -57,9 +58,11 @@ public class AuthRestAPIs {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtProvider.generateJwtToken(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
         return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), userDetails.getAuthorities()));
     }
-
+    
+    // Method for signing up User
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -80,6 +83,7 @@ public class AuthRestAPIs {
         roles.add(userRole);
         user.setRoles(roles);
         userRepository.save(user);
+
         return new ResponseEntity<>(new ResponseMessage("User registered successfully!"), HttpStatus.OK);
     }
 }
